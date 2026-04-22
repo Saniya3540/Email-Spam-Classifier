@@ -1,15 +1,23 @@
 import streamlit as st
 import pickle
 import re
+import nltk
 from nltk.stem.porter import PorterStemmer
-from nltk.corpus import stopwords
+
+# Fix for stopwords
+try:
+    from nltk.corpus import stopwords
+    stop_words = set(stopwords.words('english'))
+except LookupError:
+    nltk.download('stopwords')
+    from nltk.corpus import stopwords
+    stop_words = set(stopwords.words('english'))
 
 # load model
 model = pickle.load(open("model.pkl", "rb"))
 cv = pickle.load(open("vectorizer.pkl", "rb"))
 
 ps = PorterStemmer()
-stop_words = set(stopwords.words('english'))
 
 def predict_spam(text):
     review = re.sub('[^a-zA-Z]', ' ', text)
@@ -22,7 +30,6 @@ def predict_spam(text):
     result = model.predict(vector)[0]
     
     return "🚨 Spam" if result == 1 else "✅ Ham"
-
 
 st.title("📩 Email Spam Detection System")
 
